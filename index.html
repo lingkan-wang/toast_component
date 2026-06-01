@@ -35,11 +35,13 @@
     .btn-ic .i3d { width: 18px; height: 18px; display: block; }
     /* 点击时播放（.is-anim 由 JS 添加，动画结束后移除以便重播） */
     button.is-anim .btn-ic { animation: ti-pop .34s cubic-bezier(.34, 1.56, .64, 1); }
+    button.is-anim[data-anim="success"] .btn-ic { animation: none; }
+    button.is-anim[data-anim="success"] .js-check { animation: ti-draw .5s .05s cubic-bezier(.65, 0, .35, 1) both; }
     button.is-anim[data-anim="error"]   .btn-ic { animation: ti-shake .4s ease; }
     button.is-anim[data-anim="warning"] .btn-ic { animation: ti-pulse .5s ease; }
     button.is-anim[data-anim="loading"] .btn-ic { animation: ti-spin .6s cubic-bezier(.4, 0, .2, 1); }
     @media (prefers-reduced-motion: reduce) {
-      button.is-anim .btn-ic { animation: none !important; }
+      button.is-anim .btn-ic, button.is-anim .js-check { animation: none !important; }
     }
   </style>
 </head>

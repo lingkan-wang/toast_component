@@ -89,12 +89,8 @@
 }
 
 /* ---- 内容 ---- */
-.toast__icon { flex: 0 0 auto; display: flex; line-height: 0; margin-top: 1px; color: var(--icon-color, inherit); }
-/* 类型图标固定上色（即使不开 rich colors，也像真 Sonner 一样有颜色） */
-.toast[data-type="success"] { --icon-color: #22c55e; }
-.toast[data-type="error"]   { --icon-color: #ef4444; }
-.toast[data-type="warning"] { --icon-color: #f59e0b; }
-.toast[data-type="info"]    { --icon-color: #3b82f6; }
+/* 手绘涂鸦图标为单色：跟随文字色（浅底黑墨、暗色模式白墨） */
+.toast__icon { flex: 0 0 auto; display: flex; line-height: 0; color: inherit; }
 .toast__content { flex: 1 1 auto; min-width: 0; }
 .toast__title { font-weight: 500; }
 .toast__desc { margin-top: 2px; opacity: 0.66; }
@@ -153,13 +149,18 @@
 @keyframes ti-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-2px)} 40%{transform:translateX(2px)} 60%{transform:translateX(-1.5px)} 80%{transform:translateX(1.5px)} }
 @keyframes ti-pulse { 0%,100%{transform:scale(1)} 45%{transform:scale(1.16)} }
 @keyframes ti-spin  { to { transform: rotate(360deg); } }
+@keyframes ti-draw  { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
-/* 3D emoji 图片尺寸（图标加载不到时 alt 字形兜底） */
-.toast .i3d { width: 22px; height: 22px; display: block; user-select: none; }
+/* 涂鸦 SVG 尺寸 */
+.toast .i3d { width: 22px; height: 22px; display: block; }
 .toast__icon { margin-top: 0; }
+/* success 对勾：pathLength=1 归一化，靠描边 from→to 一笔画出来 */
+.js-check { stroke-dasharray: 1; stroke-dashoffset: 0; }
 
 /* toast 图标：入场弹一下；按类型给微表情（ease-out / 自定义曲线、时长克制） */
 .toast__icon { animation: ti-pop .34s cubic-bezier(.34, 1.56, .64, 1) both; }
+.toast[data-type="success"] .toast__icon { animation: none; }       /* 成功用"画对勾"代替弹入 */
+.toast[data-type="success"] .js-check { animation: ti-draw .5s .06s cubic-bezier(.65, 0, .35, 1) both; }
 .toast[data-type="error"]   .toast__icon { animation: ti-shake .4s .1s ease both; }
 .toast[data-type="warning"] .toast__icon { animation: ti-pulse .5s .1s ease both; }
 .toast[data-type="loading"] .toast__icon { animation: ti-spin 1.1s linear infinite; }
@@ -167,6 +168,6 @@
 /* ---- 尊重 reduced-motion ---- */
 @media (prefers-reduced-motion: reduce) {
   .toaster, .toast, .toaster[data-expanded="true"] .toast { transition-duration: 0.01ms !important; }
-  /* 关掉装饰性图标动画（图标本身保留，不做位移/缩放/旋转） */
-  .toast__icon, .toast[data-type="loading"] .toast__icon { animation: none !important; }
+  /* 关掉装饰性图标动画（图标本身保留，不做位移/缩放/旋转/描边） */
+  .toast__icon, .toast[data-type="loading"] .toast__icon, .toast[data-type="success"] .js-check { animation: none !important; }
 }

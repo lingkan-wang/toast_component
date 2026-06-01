@@ -62,29 +62,29 @@
     sync();
   }
 
-  // ---- 3D 可爱图标（Microsoft Fluent Emoji 3D，走 jsDelivr CDN；alt 兜底为 emoji 字形，离线也能看） ----
-  var EMOJI_BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/';
-  function emo3d(folder, file, glyph) {
-    return '<img class="i3d" alt="' + glyph + '" draggable="false" ' +
-           'src="' + EMOJI_BASE + folder + '/3D/' + file + '_3d.png">';
+  // ---- 黑白手绘涂鸦图标（单色 currentColor，跟随文字色；纯离线、无依赖） ----
+  // 故意让线条有点不规则、圆头收笔，做出手绘感。success 的对勾用 pathLength=1 + js-check 描边，便于"一笔画出来"。
+  function doodle(inner, sw) {
+    return '<svg class="i3d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' +
+      (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
   }
   var ICONS = {
-    success: emo3d('Check%20mark%20button', 'check_mark_button', '✅'),
-    error:   emo3d('Cross%20mark', 'cross_mark', '❌'),
-    warning: emo3d('Warning', 'warning', '⚠️'),
-    info:    emo3d('Information', 'information', 'ℹ️'),
-    loading: emo3d('Hourglass%20not%20done', 'hourglass_not_done', '⏳')
+    success: doodle('<path class="js-check" pathLength="1" d="M4.5 13c2.2 1.1 3.8 2.8 4.8 5C10.8 13 14 8.3 19.5 5.8"/>', 2.3),
+    error:   doodle('<path d="M6.6 6.8C10 10.2 14 14.2 17.4 17.6"/><path d="M17.4 6.8C14 10.2 10 14.2 6.6 17.6"/>', 2.3),
+    warning: doodle('<path d="M11.9 4.6c.4 0 .7.2.9.6l7 12.2c.4.8-.1 1.6-1 1.6H5.2c-.9 0-1.4-.8-1-1.6l7-12.2c.2-.4.5-.6.7-.6Z"/><path d="M12 10.2v3.7"/><path d="M12 16.5v.1"/>'),
+    info:    doodle('<path d="M4.4 9.4C5.2 5.9 8.2 3.6 12 3.6c4.6 0 8.4 2.6 8.4 8.2 0 5.2-3.4 8.2-8.4 8.2-4.6 0-8-2.8-8-8 0-.9.1-1.8.4-2.6Z"/><path d="M12 11v5"/><path d="M12 7.7v.1"/>'),
+    loading: doodle('<path d="M19.6 12a7.6 7.6 0 1 1-3.3-6.2"/><path d="M20 4.4 19.2 9l-4.5-.8"/>', 2.2)
   };
 
   // 工具类图标，供 demo 按钮和无类型 toast 复用
   var EXTRA_ICONS = {
-    bell:   emo3d('Bell', 'bell', '🔔'),
-    note:   emo3d('Memo', 'memo', '📝'),
-    undo:   emo3d('Right%20arrow%20curving%20left', 'right_arrow_curving_left', '↩️'),
-    loader: emo3d('Hourglass%20not%20done', 'hourglass_not_done', '⏳'),
-    layers: emo3d('Party%20popper', 'party_popper', '🎉'),
-    trash:  emo3d('Wastebasket', 'wastebasket', '🗑️'),
-    fire:   emo3d('Fire', 'fire', '🔥')
+    bell:   doodle('<path d="M7 10.2C7 6.8 9.2 5 12 5s5 1.8 5 5.2c0 3.6 1.4 5 2 5.8.3.4 0 1-.6 1H5.6c-.6 0-.9-.6-.6-1 .6-.8 2-2.2 2-5.8Z"/><path d="M10.1 19.3a2.1 2.1 0 0 0 3.8 0"/>'),
+    note:   doodle('<path d="M6.2 4.6H15l3.8 3.8v10.5c0 .6-.4 1-1 1H6.2c-.6 0-1-.4-1-1V5.6c0-.6.4-1 1-1Z"/><path d="M8.6 11.2h7M8.6 14.6h4.8"/>'),
+    undo:   doodle('<path d="M8 7 4.5 10.5 8 14"/><path d="M4.5 10.5h9a5 5 0 0 1 0 10h-1.6"/>'),
+    loader: doodle('<path d="M19.6 12a7.6 7.6 0 1 1-3.3-6.2"/><path d="M20 4.4 19.2 9l-4.5-.8"/>', 2.2),
+    layers: doodle('<path d="M12 4.4c.8 2.9 1.9 4 4.8 4.8-2.9.8-4 1.9-4.8 4.8-.8-2.9-1.9-4-4.8-4.8C10.1 8.4 11.2 7.3 12 4.4Z"/><path d="M18.4 14.6l.8 2.2M5.7 15.2 4.9 17.4M16.3 19.4l1.4 1.1"/>'),
+    trash:  doodle('<path d="M5 7.2h14"/><path d="M9.2 7.2V5.5c0-.4.3-.8.8-.8h4c.5 0 .8.4.8.8v1.7"/><path d="M7.2 7.2 8 19.4c0 .4.4.7.8.7h6.4c.4 0 .8-.3.8-.7l.8-12.2"/><path d="M10.6 10.6v6M13.4 10.6v6"/>'),
+    fire:   doodle('<path d="M13.2 3.2c.6 3-1.4 4.6-3 6.6C8.4 11.9 7 13.4 7 15.6 7 19 9.7 21 12 21s5-2 5-5.4c0-2-.8-3.4-1.7-4.7-.6 1-1.4 1.6-2.4 1.9 1.3-2.7 1.1-5.8.3-9.6Z"/>')
   };
 
   // ---- 新增 / 更新一条 toast ----
