@@ -149,7 +149,7 @@
     if (CONFIG.closeButton) {
       var close = document.createElement('button');
       close.className = 'toast__close';
-      close.setAttribute('aria-label', '关闭');
+      close.setAttribute('aria-label', 'Close');
       close.innerHTML = '&times;';
       close.addEventListener('click', function (e) { e.stopPropagation(); dismiss(state.id); });
       el.appendChild(close);
@@ -312,13 +312,13 @@
   toast.message = function (message, options) { return addToast(message, options || {}, 'default'); };
   toast.promise = function (promise, opts) {
     opts = opts || {};
-    var id = addToast(opts.loading || '加载中…', { duration: Infinity }, 'loading');
+    var id = addToast(opts.loading || 'Loading…', { duration: Infinity }, 'loading');
     var p = (typeof promise === 'function') ? promise() : promise;
     Promise.resolve(p).then(function (data) {
-      var msg = typeof opts.success === 'function' ? opts.success(data) : (opts.success || '成功');
+      var msg = typeof opts.success === 'function' ? opts.success(data) : (opts.success || 'Success');
       addToast(msg, { id: id, duration: CONFIG.duration }, 'success');
     }, function (err) {
-      var msg = typeof opts.error === 'function' ? opts.error(err) : (opts.error || '失败');
+      var msg = typeof opts.error === 'function' ? opts.error(err) : (opts.error || 'Error');
       addToast(msg, { id: id, duration: CONFIG.duration }, 'error');
     });
     return id;

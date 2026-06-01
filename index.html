@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sonner 复刻 demo</title>
+  <title>Sonner clone</title>
   <link rel="stylesheet" href="sonner.css">
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0; min-height: 100vh; background: #fafafa; color: #18181b;
-      font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       display: flex; align-items: center; justify-content: center;
     }
     .panel { display: grid; gap: 16px; padding: 40px; width: 560px; max-width: 92vw; }
@@ -33,33 +33,33 @@
 <body>
   <main class="panel">
     <div class="group">
-      <h1>Sonner 复刻 demo</h1>
-      <p class="sub">纯 HTML/CSS/JS、零依赖。连发几条看堆叠，hover 看展开，拖拽划走关闭。</p>
+      <h1>Sonner clone</h1>
+      <p class="sub">Vanilla HTML/CSS/JS, zero dependencies. Fire a few to see them stack, hover to expand, drag sideways to dismiss.</p>
     </div>
 
     <div class="group">
-      <h2>触发</h2>
+      <h2>Trigger</h2>
       <div class="row">
-        <button id="btn-default">默认</button>
-        <button id="btn-success">成功</button>
-        <button id="btn-error">错误</button>
-        <button id="btn-warning">警告</button>
-        <button id="btn-info">信息</button>
-        <button id="btn-loading">loading</button>
+        <button id="btn-default">Default</button>
+        <button id="btn-success">Success</button>
+        <button id="btn-error">Error</button>
+        <button id="btn-warning">Warning</button>
+        <button id="btn-info">Info</button>
+        <button id="btn-loading">Loading</button>
       </div>
       <div class="row">
-        <button id="btn-desc">带描述</button>
-        <button id="btn-action">带撤销按钮</button>
-        <button id="btn-promise">promise</button>
-        <button id="btn-burst">连发 3 条</button>
-        <button id="btn-clear">全部关闭</button>
+        <button id="btn-desc">With description</button>
+        <button id="btn-action">With action</button>
+        <button id="btn-promise">Promise</button>
+        <button id="btn-burst">Burst 3</button>
+        <button id="btn-clear">Dismiss all</button>
       </div>
     </div>
 
     <div class="group">
-      <h2>设置</h2>
+      <h2>Settings</h2>
       <div class="row">
-        <label>位置：
+        <label>Position:
           <select id="sel-pos">
             <option value="bottom-right">bottom-right</option>
             <option value="bottom-center">bottom-center</option>
@@ -71,48 +71,48 @@
         </label>
       </div>
       <div class="row switches">
-        <label><input type="checkbox" id="sw-rich"> rich colors</label>
-        <label><input type="checkbox" id="sw-expand"> 默认展开</label>
-        <label><input type="checkbox" id="sw-dark"> 暗色</label>
-        <label><input type="checkbox" id="sw-close"> 关闭按钮</label>
+        <label><input type="checkbox" id="sw-rich"> Rich colors</label>
+        <label><input type="checkbox" id="sw-expand"> Expand by default</label>
+        <label><input type="checkbox" id="sw-dark"> Dark</label>
+        <label><input type="checkbox" id="sw-close"> Close button</label>
       </div>
     </div>
   </main>
 
   <script src="sonner.js"></script>
   <script>
-    // ---- 触发按钮 ----
+    // ---- Trigger buttons ----
     document.getElementById('btn-default').addEventListener('click', function () {
-      window.toast('已保存到草稿箱');
+      window.toast('Saved to drafts');
     });
     var typeMap = { 'btn-success': 'success', 'btn-error': 'error', 'btn-warning': 'warning', 'btn-info': 'info', 'btn-loading': 'loading' };
     Object.keys(typeMap).forEach(function (id) {
       document.getElementById(id).addEventListener('click', function () {
         var t = typeMap[id];
-        var msgs = { success: '上传成功', error: '出错了，请重试', warning: '空间快满了', info: '有 3 条新通知', loading: '正在处理…' };
+        var msgs = { success: 'Uploaded successfully', error: 'Something went wrong', warning: 'Storage almost full', info: '3 new notifications', loading: 'Processing…' };
         window.toast[t](msgs[t]);
       });
     });
     document.getElementById('btn-desc').addEventListener('click', function () {
-      window.toast('会议已创建', { description: '周四 14:00 · Design Sync · 已通知 5 位参与者' });
+      window.toast('Meeting created', { description: 'Thu 2:00 PM · Design Sync · 5 people notified' });
     });
     document.getElementById('btn-action').addEventListener('click', function () {
-      window.toast('已删除「未命名文档」', {
-        action: { label: '撤销', onClick: function () { window.toast.success('已恢复'); } }
+      window.toast('Deleted "Untitled document"', {
+        action: { label: 'Undo', onClick: function () { window.toast.success('Restored'); } }
       });
     });
     document.getElementById('btn-promise').addEventListener('click', function () {
       window.toast.promise(new Promise(function (res) { setTimeout(res, 1600); }),
-        { loading: '保存中…', success: '已保存', error: '保存失败' });
+        { loading: 'Saving…', success: 'Saved', error: 'Failed to save' });
     });
     document.getElementById('btn-burst').addEventListener('click', function () {
-      window.toast('第一条'); window.toast.success('第二条'); window.toast.info('第三条');
+      window.toast('First'); window.toast.success('Second'); window.toast.info('Third');
     });
     document.getElementById('btn-clear').addEventListener('click', function () {
       window.toast.dismiss();
     });
 
-    // ---- 设置 ----
+    // ---- Settings ----
     document.getElementById('sel-pos').addEventListener('change', function (e) {
       window.toast.configure({ position: e.target.value });
       window.toast(e.target.value);
