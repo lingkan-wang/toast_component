@@ -63,13 +63,23 @@
   }
 
   // ---- 类型图标（内联 SVG 字符串） ----
-  // fill-rule=evenodd 让内部字形从圆/三角里"挖空"，露出 toast 底色（Sonner 的图标观感）
+  // 类型图标：填充实心 + evenodd 挖空（success 的对勾用描边，便于"自己画出来"的微动画，class js-check）
   var ICONS = {
-    success: '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M10 18a8 8 0 110-16 8 8 0 010 16zM8.6 13.4l5-5-1.1-1.1-3.9 3.9-1.9-1.9-1.1 1.1 3 3z"/></svg>',
+    success: '<svg viewBox="0 0 20 20" width="20" height="20"><circle cx="10" cy="10" r="9" fill="currentColor"/><path class="js-check" d="M5.8 10.4l2.7 2.7 5-5.2" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     error:   '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M10 18a8 8 0 110-16 8 8 0 010 16zM9 5h2v6H9V5zm0 8h2v2H9v-2z"/></svg>',
     warning: '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M10 1.2l8.7 15.6H1.3L10 1.2zM9 7.5h2V12H9V7.5zm0 5.5h2v2H9v-2z"/></svg>',
     info:    '<svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M10 18a8 8 0 110-16 8 8 0 010 16zM9 9h2v5H9V9zm0-3h2v2H9V6z"/></svg>',
     loading: '<span class="toast__spinner" aria-label="loading"></span>'
+  };
+
+  // 工具类图标（线性、中性色），供 demo 按钮和无类型 toast 复用
+  var EXTRA_ICONS = {
+    bell:   '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a4 4 0 018 0c0 3.5 1.4 4.5 1.4 4.5H4.6S6 12 6 8.5z"/><path d="M8.4 15.5a1.8 1.8 0 003.2 0"/></svg>',
+    note:   '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 6h10M5 10h10M5 14h6"/></svg>',
+    undo:   '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7L4 10l3 3"/><path d="M4 10h7a4 4 0 010 8H9"/></svg>',
+    loader: '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="7" opacity="0.25"/><path d="M10 3a7 7 0 017 7"/></svg>',
+    layers: '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3l7 4-7 4-7-4 7-4z"/><path d="M3.5 11L10 14.7 16.5 11"/></svg>',
+    trash:  '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4h4v2M6.5 6l.8 10h5.4l.8-10"/></svg>'
   };
 
   // ---- 新增 / 更新一条 toast ----
@@ -331,6 +341,9 @@
     toasts.forEach(function (s) { renderToastContent(s); }); // 反映 closeButton 等变化
     sync();
   };
+
+  // 对外暴露图标库（demo 按钮复用同款 SVG，保证按钮与 toast 图标完全一致）
+  toast.icons = Object.assign({}, ICONS, EXTRA_ICONS);
 
   // 暴露
   window.toast = toast;

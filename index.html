@@ -21,6 +21,7 @@
     button {
       font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 9px;
       border: 1px solid rgba(0, 0, 0, 0.12); background: #fff; cursor: pointer;
+      display: inline-flex; align-items: center;
       transition: transform .1s ease, background .15s ease;
     }
     button:hover { background: #f4f4f5; }
@@ -28,6 +29,25 @@
     label { font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
     select { font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 9px; border: 1px solid rgba(0,0,0,0.12); background: #fff; }
     .switches { gap: 16px; }
+
+    /* ---- Trigger 按钮里的图标（与 toast 同款 SVG、同款 keyframes） ---- */
+    .btn-ic { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-right: 7px; }
+    .btn-ic svg { width: 16px; height: 16px; display: block; }
+    /* 类型图标上色（与 toast 一致） */
+    button[data-anim="success"] .btn-ic { color: #22c55e; }
+    button[data-anim="error"]   .btn-ic { color: #ef4444; }
+    button[data-anim="warning"] .btn-ic { color: #f59e0b; }
+    button[data-anim="info"]    .btn-ic { color: #3b82f6; }
+    /* 点击时播放（.is-anim 由 JS 添加，动画结束后移除以便重播） */
+    button.is-anim .btn-ic { animation: ti-pop .34s cubic-bezier(.34, 1.56, .64, 1); }
+    button.is-anim[data-anim="success"] .js-check { animation: ti-draw .42s .05s cubic-bezier(.65, 0, .35, 1) both; }
+    button.is-anim[data-anim="error"]   .btn-ic { animation: ti-shake .4s ease; }
+    button.is-anim[data-anim="warning"] .btn-ic { animation: ti-pulse .5s ease; }
+    button.is-anim[data-anim="loading"] .btn-ic { animation: ti-spin-once .6s cubic-bezier(.4, 0, .2, 1); }
+    @keyframes ti-spin-once { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      button.is-anim .btn-ic, button.is-anim .js-check { animation: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -81,46 +101,50 @@
 
   <script src="sonner.js"></script>
   <script>
-    // ---- Trigger buttons ----
-    document.getElementById('btn-default').addEventListener('click', function () {
-      window.toast('Saved to drafts');
-    });
-    var typeMap = { 'btn-success': 'success', 'btn-error': 'error', 'btn-warning': 'warning', 'btn-info': 'info', 'btn-loading': 'loading' };
-    Object.keys(typeMap).forEach(function (id) {
-      document.getElementById(id).addEventListener('click', function () {
-        var t = typeMap[id];
-        var msgs = { success: 'Uploaded successfully', error: 'Something went wrong', warning: 'Storage almost full', info: '3 new notifications', loading: 'Processing…' };
-        window.toast[t](msgs[t]);
-      });
-    });
-    document.getElementById('btn-desc').addEventListener('click', function () {
-      window.toast('Meeting created', { description: 'Thu 2:00 PM · Design Sync · 5 people notified' });
-    });
-    document.getElementById('btn-action').addEventListener('click', function () {
-      window.toast('Deleted "Untitled document"', {
-        action: { label: 'Undo', onClick: function () { window.toast.success('Restored'); } }
-      });
-    });
-    document.getElementById('btn-promise').addEventListener('click', function () {
-      window.toast.promise(new Promise(function (res) { setTimeout(res, 1600); }),
-        { loading: 'Saving…', success: 'Saved', error: 'Failed to save' });
-    });
-    document.getElementById('btn-burst').addEventListener('click', function () {
-      window.toast('First'); window.toast.success('Second'); window.toast.info('Third');
-    });
-    document.getElementById('btn-clear').addEventListener('click', function () {
-      window.toast.dismiss();
+    var T = window.toast;
+    var ICN = T.icons;
+
+    // 每个 Trigger 按钮：图标 + 动画类型 + 点击产生的 toast
+    var BTNS = {
+      'btn-default': { icon: ICN.bell,    anim: 'default', fire: function () { T('Saved to drafts', { icon: ICN.bell }); } },
+      'btn-success': { icon: ICN.success, anim: 'success', fire: function () { T.success('Uploaded successfully'); } },
+      'btn-error':   { icon: ICN.error,   anim: 'error',   fire: function () { T.error('Something went wrong'); } },
+      'btn-warning': { icon: ICN.warning, anim: 'warning', fire: function () { T.warning('Storage almost full'); } },
+      'btn-info':    { icon: ICN.info,    anim: 'info',    fire: function () { T.info('3 new notifications'); } },
+      'btn-loading': { icon: ICN.loader,  anim: 'loading', fire: function () { T.loading('Processing…'); } },
+      'btn-desc':    { icon: ICN.note,    anim: 'default', fire: function () { T('Meeting created', { description: 'Thu 2:00 PM · Design Sync · 5 people notified', icon: ICN.note }); } },
+      'btn-action':  { icon: ICN.undo,    anim: 'default', fire: function () { T('Deleted "Untitled document"', { icon: ICN.undo, action: { label: 'Undo', onClick: function () { T.success('Restored'); } } }); } },
+      'btn-promise': { icon: ICN.loader,  anim: 'loading', fire: function () { T.promise(new Promise(function (res) { setTimeout(res, 1600); }), { loading: 'Saving…', success: 'Saved', error: 'Failed to save' }); } },
+      'btn-burst':   { icon: ICN.layers,  anim: 'default', fire: function () { T('First', { icon: ICN.bell }); T.success('Second'); T.info('Third'); } },
+      'btn-clear':   { icon: ICN.trash,   anim: 'default', fire: function () { T.dismiss(); } }
+    };
+
+    // 重播图标动画：移除类 → 强制 reflow → 重新加类
+    function playIcon(btn) {
+      btn.classList.remove('is-anim');
+      void btn.offsetWidth;
+      btn.classList.add('is-anim');
+      setTimeout(function () { btn.classList.remove('is-anim'); }, 650);
+    }
+
+    Object.keys(BTNS).forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      var cfg = BTNS[id];
+      btn.dataset.anim = cfg.anim;
+      btn.insertAdjacentHTML('afterbegin', '<span class="btn-ic">' + cfg.icon + '</span>');
+      btn.addEventListener('click', function () { playIcon(btn); cfg.fire(); });
     });
 
     // ---- Settings ----
     document.getElementById('sel-pos').addEventListener('change', function (e) {
-      window.toast.configure({ position: e.target.value });
-      window.toast(e.target.value);
+      T.configure({ position: e.target.value });
+      T(e.target.value, { icon: ICN.bell });
     });
-    document.getElementById('sw-rich').addEventListener('change', function (e) { window.toast.configure({ richColors: e.target.checked }); });
-    document.getElementById('sw-expand').addEventListener('change', function (e) { window.toast.configure({ expand: e.target.checked }); });
-    document.getElementById('sw-dark').addEventListener('change', function (e) { window.toast.configure({ theme: e.target.checked ? 'dark' : 'light' }); });
-    document.getElementById('sw-close').addEventListener('change', function (e) { window.toast.configure({ closeButton: e.target.checked }); });
+    document.getElementById('sw-rich').addEventListener('change', function (e) { T.configure({ richColors: e.target.checked }); });
+    document.getElementById('sw-expand').addEventListener('change', function (e) { T.configure({ expand: e.target.checked }); });
+    document.getElementById('sw-dark').addEventListener('change', function (e) { T.configure({ theme: e.target.checked ? 'dark' : 'light' }); });
+    document.getElementById('sw-close').addEventListener('change', function (e) { T.configure({ closeButton: e.target.checked }); });
   </script>
 </body>
 </html>
