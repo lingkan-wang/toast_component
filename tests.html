@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="utf-8"><title>sonner logic tests</title>
+<style>body{font-family:ui-monospace,monospace;padding:24px;}pre{font-size:13px;line-height:1.6;}</style>
+</head>
+<body>
+<pre id="out"></pre>
+<script src="sonner.js"></script>
+<script>
+  var out = document.getElementById('out');
+  var pass = 0, fail = 0;
+  function assert(name, cond) {
+    if (cond) { pass++; out.textContent += 'PASS  ' + name + '\n'; }
+    else { fail++; out.textContent += 'FAIL  ' + name + '\n'; }
+  }
+
+  var T = window.__sonnerTest;
+  assert('exposes test hooks', !!T && typeof T.makeTimer === 'function');
+
+  if (T) {
+    // ---- 计时模型：注入可控时钟 ----
+    var fired = 0;
+    var now = 1000;
+    var clock = function () { return now; };
+    var timer = T.makeTimer(100, function () { fired++; }, clock);
+
+    timer.start();
+    now = 1050; timer.pause();
+    assert('not fired before duration', fired === 0);
+    assert('remaining tracked after pause', Math.round(timer.remaining()) === 50);
+
+    now = 9999; // 暂停期间时间流逝不计入
+    assert('paused freezes remaining', Math.round(timer.remaining()) === 50);
+
+    now = 10000; timer.resume();
+    now = 10050; timer.tick(); // 测试用手动判定到期
+    assert('fires after remaining elapses', fired === 1);
+
+    // ---- 配置合并 ----
+    window.toast.configure({ gap: 22 });
+    assert('configure merges into CONFIG', T.getConfig().gap === 22);
+  }
+
+  out.textContent += '\n' + pass + ' passed, ' + fail + ' failed\n';
+  window.__testResult = { pass: pass, fail: fail };
+</script>
+</body>
+</html>

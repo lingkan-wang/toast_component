@@ -1,0 +1,154 @@
+/* sonner.css — toast 样式 + 堆叠模型（位置数学全在 calc 里） */
+
+:root { --sonner-width: 356px; }
+
+/* ---- 容器：固定在某个角，宽度固定，高度由 JS 写入并平滑过渡 ---- */
+.toaster {
+  position: fixed;
+  z-index: 999999;
+  width: var(--sonner-width);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  transition: height .4s cubic-bezier(.21, 1.02, .73, 1);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 6 个位置锚点。--y：堆叠方向系数，由 JS 写入（bottom=-1 向上叠，top=+1 向下叠） */
+.toaster[data-position="bottom-right"]  { bottom: var(--offset); right: var(--offset); }
+.toaster[data-position="bottom-left"]   { bottom: var(--offset); left:  var(--offset); }
+.toaster[data-position="top-right"]     { top:    var(--offset); right: var(--offset); }
+.toaster[data-position="top-left"]      { top:    var(--offset); left:  var(--offset); }
+.toaster[data-position="bottom-center"] { bottom: var(--offset); left: 50%; transform: translateX(-50%); }
+.toaster[data-position="top-center"]    { top:    var(--offset); left: 50%; transform: translateX(-50%); }
+
+/* ---- 单条 toast ---- */
+.toast {
+  --peek: 16px;          /* 收起态每往后一条往外露出的距离 */
+  --scale-step: 0.05;    /* 每往后一条缩小 5% */
+  --swipe-amount: 0px;   /* 拖拽横向位移，叠加在堆叠 transform 之上 */
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 13px;
+  background: var(--toast-bg, #fff);
+  color: var(--toast-fg, #18181b);
+  border: 1px solid var(--toast-border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10), 0 2px 4px rgba(0, 0, 0, 0.06);
+  font-size: 13px;
+  line-height: 1.5;
+  touch-action: none;
+  cursor: grab;
+  transform-origin: center var(--origin-edge, bottom);
+  /* 收起态：横向拖拽 + 往外顶 + 逐级缩小 */
+  transform:
+    translateX(var(--swipe-amount))
+    translateY(calc(var(--y) * var(--toasts-before) * var(--peek)))
+    scale(calc(1 - var(--toasts-before) * var(--scale-step)));
+  transition:
+    transform .45s cubic-bezier(.21, 1.02, .73, 1),
+    opacity .4s ease;
+}
+.toaster[data-position^="bottom"] .toast { bottom: 0; }
+.toaster[data-position^="top"]    .toast { top: 0; --origin-edge: top; }
+
+/* 超过可见数的，收起态藏起来 */
+.toast[data-visible="false"] { opacity: 0; pointer-events: none; }
+
+/* ---- 展开态：按"前面各条高度和 + 间距"铺成一列 ---- */
+.toaster[data-expanded="true"] .toast {
+  transform:
+    translateX(var(--swipe-amount))
+    translateY(calc(var(--y) * (var(--before-height) + var(--toasts-before) * var(--gap))));
+}
+.toaster[data-expanded="true"] .toast[data-visible="false"] { opacity: 1; pointer-events: auto; }
+
+/* ---- 进场起点 / 退场终点：在屏幕边缘外、透明、略缩小（方向与堆叠相反） ---- */
+.toast[data-mounted="false"],
+.toast[data-removed="true"] {
+  opacity: 0;
+  transform: translateY(calc(var(--y) * -100%)) scale(0.9);
+}
+
+/* ---- 拖拽中：只跟手（关掉常规过渡），位移由 --swipe-amount 叠加 ---- */
+.toast[data-swiping="true"] {
+  cursor: grabbing;
+  transition: none;
+}
+/* ---- 划走：保持横向位置继续滑出（与拖拽方向一致），快速淡出 ---- */
+.toast[data-swiped-out="true"] {
+  opacity: 0;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+/* ---- 内容 ---- */
+.toast__icon { flex: 0 0 auto; display: flex; line-height: 0; margin-top: 1px; color: var(--icon-color, inherit); }
+/* 类型图标固定上色（即使不开 rich colors，也像真 Sonner 一样有颜色） */
+.toast[data-type="success"] { --icon-color: #22c55e; }
+.toast[data-type="error"]   { --icon-color: #ef4444; }
+.toast[data-type="warning"] { --icon-color: #f59e0b; }
+.toast[data-type="info"]    { --icon-color: #3b82f6; }
+.toast__content { flex: 1 1 auto; min-width: 0; }
+.toast__title { font-weight: 500; }
+.toast__desc { margin-top: 2px; opacity: 0.66; }
+
+/* loading spinner */
+.toast__spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.15); border-top-color: rgba(0, 0, 0, 0.6);
+  display: inline-block; animation: toast-spin .7s linear infinite;
+}
+@keyframes toast-spin { to { transform: rotate(360deg); } }
+
+/* action / cancel 按钮 */
+.toast__actions { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+.toast__btn {
+  font: inherit; font-size: 12px; padding: 5px 11px; border-radius: 7px;
+  cursor: pointer; border: 1px solid transparent;
+  transition: transform .12s ease-out;
+}
+.toast__btn:active { transform: scale(0.97); }
+.toast__btn--action { background: #18181b; color: #fff; }
+.toast__btn--cancel { background: transparent; color: inherit; border-color: rgba(0, 0, 0, 0.15); }
+
+/* 关闭按钮 */
+.toast__close {
+  position: absolute; top: 6px; left: 6px; width: 20px; height: 20px;
+  border-radius: 50%; border: 1px solid var(--toast-border, rgba(0, 0, 0, 0.1));
+  background: var(--toast-bg, #fff); color: inherit; cursor: pointer;
+  line-height: 1; font-size: 14px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .15s;
+}
+.toast:hover .toast__close { opacity: 1; }
+
+/* ---- 暗色主题 ---- */
+.toaster[data-theme="dark"] .toast {
+  --toast-bg: #1c1c1f; --toast-fg: #fafafa; --toast-border: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+.toaster[data-theme="dark"] .toast__spinner { border-color: rgba(255, 255, 255, 0.2); border-top-color: rgba(255, 255, 255, 0.7); }
+.toaster[data-theme="dark"] .toast__btn--action { background: #fafafa; color: #18181b; }
+.toaster[data-theme="dark"] .toast__btn--cancel { border-color: rgba(255, 255, 255, 0.2); }
+
+/* ---- rich colors（按类型上色） ---- */
+.toaster[data-rich-colors="true"] .toast[data-type="success"] { --toast-bg:#ecfdf3; --toast-fg:#0a6b3b; --toast-border:#a6f4c5; }
+.toaster[data-rich-colors="true"] .toast[data-type="error"]   { --toast-bg:#fef3f2; --toast-fg:#b42318; --toast-border:#fecdca; }
+.toaster[data-rich-colors="true"] .toast[data-type="warning"] { --toast-bg:#fffaeb; --toast-fg:#b54708; --toast-border:#fedf89; }
+.toaster[data-rich-colors="true"] .toast[data-type="info"]    { --toast-bg:#eff8ff; --toast-fg:#175cd3; --toast-border:#b2ddff; }
+.toaster[data-theme="dark"][data-rich-colors="true"] .toast[data-type="success"] { --toast-bg:#052e1c; --toast-fg:#6ce9a6; --toast-border:#085d3a; }
+.toaster[data-theme="dark"][data-rich-colors="true"] .toast[data-type="error"]   { --toast-bg:#3a0a0a; --toast-fg:#fda29b; --toast-border:#7a271a; }
+.toaster[data-theme="dark"][data-rich-colors="true"] .toast[data-type="warning"] { --toast-bg:#3a2a05; --toast-fg:#fec84b; --toast-border:#7a5a13; }
+.toaster[data-theme="dark"][data-rich-colors="true"] .toast[data-type="info"]    { --toast-bg:#0a1a3a; --toast-fg:#84caff; --toast-border:#1849a9; }
+
+/* ---- 尊重 reduced-motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .toaster, .toast, .toaster[data-expanded="true"] .toast { transition-duration: 0.01ms !important; }
+}
