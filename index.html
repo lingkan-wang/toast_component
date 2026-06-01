@@ -33,16 +33,7 @@
     /* ---- Trigger 按钮里的 3D 图标（与 toast 同款图片、同款 keyframes） ---- */
     .btn-ic { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: 7px; }
     .btn-ic .i3d { width: 18px; height: 18px; display: block; }
-    /* 点击时播放（.is-anim 由 JS 添加，动画结束后移除以便重播） */
-    button.is-anim .btn-ic { animation: ti-pop .34s cubic-bezier(.34, 1.56, .64, 1); }
-    button.is-anim[data-anim="success"] .btn-ic { animation: none; }
-    button.is-anim[data-anim="success"] .js-check { animation: ti-draw .5s .05s cubic-bezier(.65, 0, .35, 1) both; }
-    button.is-anim[data-anim="error"]   .btn-ic { animation: ti-shake .4s ease; }
-    button.is-anim[data-anim="warning"] .btn-ic { animation: ti-pulse .5s ease; }
-    button.is-anim[data-anim="loading"] .btn-ic { animation: ti-spin .6s cubic-bezier(.4, 0, .2, 1); }
-    @media (prefers-reduced-motion: reduce) {
-      button.is-anim .btn-ic, button.is-anim .js-check { animation: none !important; }
-    }
+    /* 按钮里的图标保持静止（不做点击动画）；toast 上的图标动画不受影响 */
   </style>
 </head>
 <body>
@@ -114,21 +105,12 @@
       'btn-clear':   { icon: ICN.trash,   anim: 'default', fire: function () { T.dismiss(); } }
     };
 
-    // 重播图标动画：移除类 → 强制 reflow → 重新加类
-    function playIcon(btn) {
-      btn.classList.remove('is-anim');
-      void btn.offsetWidth;
-      btn.classList.add('is-anim');
-      setTimeout(function () { btn.classList.remove('is-anim'); }, 650);
-    }
-
     Object.keys(BTNS).forEach(function (id) {
       var btn = document.getElementById(id);
       if (!btn) return;
       var cfg = BTNS[id];
-      btn.dataset.anim = cfg.anim;
       btn.insertAdjacentHTML('afterbegin', '<span class="btn-ic">' + cfg.icon + '</span>');
-      btn.addEventListener('click', function () { playIcon(btn); cfg.fire(); });
+      btn.addEventListener('click', function () { cfg.fire(); });
     });
 
     // ---- Settings ----
