@@ -27,7 +27,32 @@
     button:hover { background: #f4f4f5; }
     button:active { transform: scale(0.97); }
     label { font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-    select { font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 9px; border: 1px solid rgba(0,0,0,0.12); background: #fff; }
+    /* Custom select: strip the native OS arrow and draw our own chevron so it
+       lives *inside* the rounded control, matching the buttons' look + feel. */
+    select {
+      font: inherit; font-size: 13px;
+      padding: 8px 32px 8px 12px;      /* right padding leaves room for the chevron */
+      border-radius: 9px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: #18181b; cursor: pointer;
+      appearance: none; -webkit-appearance: none; -moz-appearance: none;
+      background-color: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 11px center;
+      background-size: 14px 14px;
+      transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .1s ease;
+    }
+    select:hover { background-color: #f4f4f5; border-color: rgba(0, 0, 0, 0.2); }
+    select:active { transform: scale(0.97); }   /* same press feedback as the buttons */
+    select:focus-visible {
+      outline: none;
+      border-color: rgba(24, 24, 27, 0.55);
+      box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.10);
+    }
+    /* checkboxes pick up the same near-black accent as the action button */
+    .switches input[type="checkbox"] { accent-color: #18181b; cursor: pointer; }
+    .switches label { cursor: pointer; }
     .switches { gap: 16px; }
 
     /* ---- Trigger 按钮里的 3D 图标（与 toast 同款图片、同款 keyframes） ---- */
